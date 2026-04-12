@@ -12,6 +12,9 @@ type Props = {
 
 const STEPS = ["Fetching page...", "Analyzing ad creative...", "Applying personalization..."];
 
+const urlFieldClassName =
+  "w-full rounded-xl border border-gray-200/90 bg-white/85 px-4 py-3.5 text-sm text-gray-900 shadow-inner shadow-gray-100/50 transition-all duration-300 [color-scheme:light] placeholder:text-slate-600 placeholder:opacity-100 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/40";
+
 export default function PersonalizeForm({ onResult, onError, isLoading, setIsLoading }: Props) {
   const [adType, setAdType] = useState<"url" | "file">("url");
   const [adUrl, setAdUrl] = useState("");
@@ -126,7 +129,7 @@ export default function PersonalizeForm({ onResult, onError, isLoading, setIsLoa
             value={adUrl}
             onChange={(e) => setAdUrl(e.target.value)}
             placeholder="https://example.com/ad-banner.jpg"
-            className="w-full px-4 py-3.5 rounded-xl border border-gray-200/90 bg-white/60 text-sm shadow-inner shadow-gray-100/50 transition-all duration-300 placeholder:text-gray-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+            className={urlFieldClassName}
             required
           />
         ) : (
@@ -158,7 +161,7 @@ export default function PersonalizeForm({ onResult, onError, isLoading, setIsLoa
           value={pageUrl}
           onChange={(e) => setPageUrl(e.target.value)}
           placeholder="https://yoursite.com/landing"
-          className="w-full px-4 py-3.5 rounded-xl border border-gray-200/90 bg-white/60 text-sm shadow-inner shadow-gray-100/50 transition-all duration-300 placeholder:text-gray-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+          className={urlFieldClassName}
           required
         />
       </div>
