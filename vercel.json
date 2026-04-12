@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "src/app/api/personalize/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}

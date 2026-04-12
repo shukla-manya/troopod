@@ -1,65 +1,90 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import PersonalizeForm from "../components/PersonalizeForm";
+import DiffSummary from "../components/DiffSummary";
+import BeforeAfterPanel from "../components/BeforeAfterPanel";
+import WarningsPanel from "../components/WarningsPanel";
+import type { PersonalizationResult } from "../lib/validators";
 
 export default function Home() {
+  const [result, setResult] = useState<PersonalizationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  function handleResult(r: PersonalizationResult) {
+    setResult(r);
+    setError(null);
+    setTimeout(() => {
+      document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }
+
+  function handleReset() {
+    setResult(null);
+    setError(null);
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+      <div className="max-w-5xl mx-auto px-4 py-12">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4">
+            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            AI-Powered CRO
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">
+            Match your page to your ad
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-gray-500 text-lg max-w-xl mx-auto">
+            Input an ad creative and a landing page URL. Get a personalized version that aligns messaging and boosts conversion.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
+          <PersonalizeForm
+            onResult={handleResult}
+            onError={setError}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+          />
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
         </div>
-      </main>
+
+        {result && (
+          <div id="results" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">Results</h2>
+              <button
+                onClick={handleReset}
+                className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                ← New personalization
+              </button>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <DiffSummary result={result} />
+            </div>
+
+            <WarningsPanel warnings={result.warnings} />
+
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <BeforeAfterPanel
+                originalHtml={result.originalHtml}
+                modifiedHtml={result.modifiedHtml}
+                pageUrl={result.metadata.pageUrl}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
