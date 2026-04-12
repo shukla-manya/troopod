@@ -2,6 +2,8 @@ import { GoogleGenerativeAI, type Part } from "@google/generative-ai";
 import { getGeminiKey } from "./env";
 import type { AdInput, ScopedElement } from "./validators";
 
+export type { Part };
+
 let _client: GoogleGenerativeAI | null = null;
 
 const SYSTEM_PROMPT = `You are a Conversion Rate Optimization (CRO) specialist and copywriter.
@@ -52,7 +54,7 @@ function getModel() {
   });
 }
 
-async function buildImagePart(adInput: AdInput): Promise<Part> {
+export async function buildImagePart(adInput: AdInput): Promise<Part> {
   if (adInput.type === "file") {
     const [header, data] = adInput.value.split(",");
     const mimeType = header.replace("data:", "").replace(";base64", "") as
