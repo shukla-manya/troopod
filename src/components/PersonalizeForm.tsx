@@ -90,17 +90,19 @@ export default function PersonalizeForm({ onResult, onError, isLoading, setIsLoa
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-7">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Ad Creative</label>
-        <div className="flex gap-2 mb-3">
+        <label className="block text-sm font-semibold text-gray-800 mb-2 tracking-tight">
+          Ad Creative
+        </label>
+        <div className="flex flex-wrap gap-2 mb-3">
           <button
             type="button"
             onClick={() => setAdType("url")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 motion-reduce:transition-colors ${
               adType === "url"
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/25 scale-[1.02] motion-reduce:scale-100"
+                : "bg-gray-100/90 text-gray-600 hover:bg-gray-200/90 hover:scale-[1.02] active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
             }`}
           >
             Image URL
@@ -108,10 +110,10 @@ export default function PersonalizeForm({ onResult, onError, isLoading, setIsLoa
           <button
             type="button"
             onClick={() => setAdType("file")}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 motion-reduce:transition-colors ${
               adType === "file"
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/25 scale-[1.02] motion-reduce:scale-100"
+                : "bg-gray-100/90 text-gray-600 hover:bg-gray-200/90 hover:scale-[1.02] active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
             }`}
           >
             Upload File
@@ -124,7 +126,7 @@ export default function PersonalizeForm({ onResult, onError, isLoading, setIsLoa
             value={adUrl}
             onChange={(e) => setAdUrl(e.target.value)}
             placeholder="https://example.com/ad-banner.jpg"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
+            className="w-full px-4 py-3.5 rounded-xl border border-gray-200/90 bg-white/60 text-sm shadow-inner shadow-gray-100/50 transition-all duration-300 placeholder:text-gray-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
             required
           />
         ) : (
@@ -139,7 +141,7 @@ export default function PersonalizeForm({ onResult, onError, isLoading, setIsLoa
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="w-full px-4 py-3 rounded-xl border-2 border-dashed border-gray-300 text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-500 transition-colors"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-dashed border-indigo-200/80 bg-indigo-50/30 text-sm text-gray-600 transition-all duration-300 hover:border-indigo-400 hover:bg-indigo-50/60 hover:text-indigo-700 active:scale-[0.99] motion-reduce:active:scale-100"
             >
               {fileName ? fileName : "Click to upload image (JPG, PNG, WebP)"}
             </button>
@@ -148,13 +150,15 @@ export default function PersonalizeForm({ onResult, onError, isLoading, setIsLoa
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Landing Page URL</label>
+        <label className="block text-sm font-semibold text-gray-800 mb-2 tracking-tight">
+          Landing Page URL
+        </label>
         <input
           type="url"
           value={pageUrl}
           onChange={(e) => setPageUrl(e.target.value)}
           placeholder="https://yoursite.com/landing"
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
+          className="w-full px-4 py-3.5 rounded-xl border border-gray-200/90 bg-white/60 text-sm shadow-inner shadow-gray-100/50 transition-all duration-300 placeholder:text-gray-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
           required
         />
       </div>
@@ -162,7 +166,7 @@ export default function PersonalizeForm({ onResult, onError, isLoading, setIsLoa
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/35 hover:from-indigo-500 hover:to-violet-500 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none active:scale-[0.99] motion-reduce:transition-colors motion-reduce:active:scale-100"
       >
         {isLoading ? STEPS[stepIndex] : "Personalize Landing Page"}
       </button>
