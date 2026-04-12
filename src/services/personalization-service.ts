@@ -1,4 +1,4 @@
-import { analyzeAdAndPage } from "../lib/gemini";
+import { analyzeAdAndPage, buildImagePart, type Part } from "../lib/gemini";
 import {
   fetchPage,
   extractScopedElements,
@@ -23,23 +23,23 @@ export { ScrapingError };
 
 async function callGeminiWithRetry(
   elements: ReturnType<typeof extractScopedElements>["elements"],
-  req: PersonalizeRequest,
+  imagePart: Part,
   attempt: number = 0
 ): Promise<ReturnType<typeof PersonalizationResponseSchema.parse>> {
-  const rawText = await analyzeAdAndPage(elements, req.adInput);
+  const rawText = await analyzeAdAndPage(elements, imagePart);
 
   let parsed: unknown;
   try {
     const cleaned = rawText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     parsed = JSON.parse(cleaned);
   } catch {
-    if (attempt < 1) return callGeminiWithRetry(elements, req, attempt + 1);
+    if (attempt < 1) return callGeminiWithRetry(elements, imagePart, attempt + 1);
     throw new AIValidationError("Gemini returned invalid JSON", rawText);
   }
 
   const result = PersonalizationResponseSchema.safeParse(parsed);
   if (!result.success) {
-    if (attempt < 1) return callGeminiWithRetry(elements, req, attempt + 1);
+    if (attempt < 1) return callGeminiWithRetry(elements, imagePart, attempt + 1);
     throw new AIValidationError(`Gemini output schema mismatch: ${result.error.message}`, rawText);
   }
 
@@ -49,7 +49,11 @@ async function callGeminiWithRetry(
 export async function runPersonalization(
   req: PersonalizeRequest
 ): Promise<PersonalizationResult> {
-  const rawHtml = await fetchPage(req.pageUrl);
+  const [rawHtml, imagePart] = await Promise.all([
+    fetchPage(req.pageUrl),
+    buildImagePart(req.adInput),
+  ]);
+
   const { elements } = extractScopedElements(rawHtml);
 
   if (elements.length === 0) {
@@ -58,7 +62,7 @@ export async function runPersonalization(
     );
   }
 
-  const aiOutput = await callGeminiWithRetry(elements, req);
+  const aiOutput = await callGeminiWithRetry(elements, imagePart);
 
   const { valid: domValid, rejected: domRejected } = validateSelectorsExist(
     rawHtml,

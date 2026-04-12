@@ -77,41 +77,60 @@ export async function buildImagePart(adInput: AdInput): Promise<Part> {
   return { inlineData: { mimeType, data } };
 }
 
+function is429(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes("429") || msg.includes("Too Many Requests");
+}
+
+function isDailyQuotaExceeded(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes("PerDay") || msg.includes("per_day") || msg.includes("daily");
+}
+
 function parseRetryDelayMs(err: unknown): number {
   const msg = err instanceof Error ? err.message : String(err);
-  const match = msg.match(/"retryDelay":"(\d+)s"/);
-  return match ? parseInt(match[1], 10) * 1000 : 0;
+  // parse structured retryDelay e.g. "retryDelay":"12s"
+  const secMatch = msg.match(/"retryDelay":"(\d+)s"/);
+  if (secMatch) return parseInt(secMatch[1], 10) * 1000;
+  // parse inline text e.g. "Please retry in 500ms"
+  const msMatch = msg.match(/retry in ([\d.]+)ms/i);
+  if (msMatch) return Math.ceil(parseFloat(msMatch[1]));
+  return 0;
 }
 
 export async function analyzeAdAndPage(
   elements: ScopedElement[],
-  adInput: AdInput,
-  maxRetries = 3
+  imagePart: Part,
+  maxRetries = 2
 ): Promise<string> {
   const model = getModel();
-  const imagePart = await buildImagePart(adInput);
   const textPart: Part = {
-    text: `LANDING PAGE ELEMENTS TO POTENTIALLY MODIFY:\n${JSON.stringify(elements, null, 2)}\n\nReturn your personalization suggestions as JSON only.`,
+    text: `LANDING PAGE ELEMENTS TO POTENTIALLY MODIFY:\n${JSON.stringify(elements)}\n\nReturn your personalization suggestions as JSON only.`,
   };
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const result = await model.generateContent([imagePart, textPart]);
-      return result.response.text();
+      const result = await model.generateContentStream([imagePart, textPart]);
+      let text = "";
+      for await (const chunk of result.stream) {
+        text += chunk.text();
+      }
+      return text;
     } catch (err) {
-      const is429 =
-        err instanceof Error &&
-        (err.message.includes("429") || err.message.includes("Too Many Requests"));
+      if (!is429(err) || attempt === maxRetries) throw err;
 
-      if (!is429 || attempt === maxRetries) throw err;
+      // Daily quota exhausted — retrying won't help
+      if (isDailyQuotaExceeded(err)) {
+        throw new Error(
+          "Free tier daily request limit reached. Try again tomorrow or upgrade your Gemini API plan."
+        );
+      }
 
-      const delayMs =
-        parseRetryDelayMs(err) || Math.min(30_000 * 2 ** attempt, 120_000);
-
+      // Per-minute rate limit — wait then retry
+      const delayMs = parseRetryDelayMs(err) || Math.min(5_000 * 2 ** attempt, 30_000);
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 
-  // unreachable, but satisfies TypeScript
   throw new Error("analyzeAdAndPage: exceeded max retries");
 }
