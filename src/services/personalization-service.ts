@@ -21,7 +21,7 @@ export class AIValidationError extends Error {
 
 export { ScrapingError };
 
-async function callClaudeWithRetry(
+async function callGeminiWithRetry(
   elements: ReturnType<typeof extractScopedElements>["elements"],
   req: PersonalizeRequest,
   attempt: number = 0
@@ -33,13 +33,13 @@ async function callClaudeWithRetry(
     const cleaned = rawText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     parsed = JSON.parse(cleaned);
   } catch {
-    if (attempt < 1) return callClaudeWithRetry(elements, req, attempt + 1);
+    if (attempt < 1) return callGeminiWithRetry(elements, req, attempt + 1);
     throw new AIValidationError("Gemini returned invalid JSON", rawText);
   }
 
   const result = PersonalizationResponseSchema.safeParse(parsed);
   if (!result.success) {
-    if (attempt < 1) return callClaudeWithRetry(elements, req, attempt + 1);
+    if (attempt < 1) return callGeminiWithRetry(elements, req, attempt + 1);
     throw new AIValidationError(`Gemini output schema mismatch: ${result.error.message}`, rawText);
   }
 
@@ -58,7 +58,7 @@ export async function runPersonalization(
     );
   }
 
-  const aiOutput = await callClaudeWithRetry(elements, req);
+  const aiOutput = await callGeminiWithRetry(elements, req);
 
   const { valid: domValid, rejected: domRejected } = validateSelectorsExist(
     rawHtml,

@@ -63,7 +63,6 @@ async function buildImagePart(adInput: AdInput): Promise<Part> {
     return { inlineData: { mimeType, data } };
   }
 
-  // Fetch external URL and convert to inline base64
   const res = await fetch(adInput.value);
   if (!res.ok) throw new Error(`Failed to fetch ad image: ${res.status}`);
   const mimeType = (res.headers.get("content-type") ?? "image/jpeg").split(";")[0] as
