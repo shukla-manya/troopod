@@ -1,4 +1,4 @@
-import { analyzeAdAndPage, buildImagePart, type Part } from "../lib/gemini";
+import { analyzeAdAndPage } from "../lib/groq";
 import {
   fetchPage,
   extractScopedElements,
@@ -21,26 +21,26 @@ export class AIValidationError extends Error {
 
 export { ScrapingError };
 
-async function callGeminiWithRetry(
+async function callGroqWithRetry(
   elements: ReturnType<typeof extractScopedElements>["elements"],
-  imagePart: Part,
+  req: PersonalizeRequest,
   attempt: number = 0
 ): Promise<ReturnType<typeof PersonalizationResponseSchema.parse>> {
-  const rawText = await analyzeAdAndPage(elements, imagePart);
+  const rawText = await analyzeAdAndPage(elements, req.adInput);
 
   let parsed: unknown;
   try {
     const cleaned = rawText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     parsed = JSON.parse(cleaned);
   } catch {
-    if (attempt < 1) return callGeminiWithRetry(elements, imagePart, attempt + 1);
-    throw new AIValidationError("Gemini returned invalid JSON", rawText);
+    if (attempt < 1) return callGroqWithRetry(elements, req, attempt + 1);
+    throw new AIValidationError("Groq returned invalid JSON", rawText);
   }
 
   const result = PersonalizationResponseSchema.safeParse(parsed);
   if (!result.success) {
-    if (attempt < 1) return callGeminiWithRetry(elements, imagePart, attempt + 1);
-    throw new AIValidationError(`Gemini output schema mismatch: ${result.error.message}`, rawText);
+    if (attempt < 1) return callGroqWithRetry(elements, req, attempt + 1);
+    throw new AIValidationError(`Groq output schema mismatch: ${result.error.message}`, rawText);
   }
 
   return result.data;
@@ -49,10 +49,7 @@ async function callGeminiWithRetry(
 export async function runPersonalization(
   req: PersonalizeRequest
 ): Promise<PersonalizationResult> {
-  const [rawHtml, imagePart] = await Promise.all([
-    fetchPage(req.pageUrl),
-    buildImagePart(req.adInput),
-  ]);
+  const rawHtml = await fetchPage(req.pageUrl);
 
   const { elements } = extractScopedElements(rawHtml);
 
@@ -62,7 +59,7 @@ export async function runPersonalization(
     );
   }
 
-  const aiOutput = await callGeminiWithRetry(elements, imagePart);
+  const aiOutput = await callGroqWithRetry(elements, req);
 
   const { valid: domValid, rejected: domRejected } = validateSelectorsExist(
     rawHtml,
