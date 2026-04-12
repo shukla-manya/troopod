@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import FloatingBackdrop from "../components/FloatingBackdrop";
 import PersonalizeForm from "../components/PersonalizeForm";
 import DiffSummary from "../components/DiffSummary";
 import BeforeAfterPanel from "../components/BeforeAfterPanel";
