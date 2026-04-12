@@ -75,9 +75,16 @@ async function buildImagePart(adInput: AdInput): Promise<Part> {
   return { inlineData: { mimeType, data } };
 }
 
+function parseRetryDelayMs(err: unknown): number {
+  const msg = err instanceof Error ? err.message : String(err);
+  const match = msg.match(/"retryDelay":"(\d+)s"/);
+  return match ? parseInt(match[1], 10) * 1000 : 0;
+}
+
 export async function analyzeAdAndPage(
   elements: ScopedElement[],
-  adInput: AdInput
+  adInput: AdInput,
+  maxRetries = 3
 ): Promise<string> {
   const model = getModel();
   const imagePart = await buildImagePart(adInput);
@@ -85,6 +92,24 @@ export async function analyzeAdAndPage(
     text: `LANDING PAGE ELEMENTS TO POTENTIALLY MODIFY:\n${JSON.stringify(elements, null, 2)}\n\nReturn your personalization suggestions as JSON only.`,
   };
 
-  const result = await model.generateContent([imagePart, textPart]);
-  return result.response.text();
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await model.generateContent([imagePart, textPart]);
+      return result.response.text();
+    } catch (err) {
+      const is429 =
+        err instanceof Error &&
+        (err.message.includes("429") || err.message.includes("Too Many Requests"));
+
+      if (!is429 || attempt === maxRetries) throw err;
+
+      const delayMs =
+        parseRetryDelayMs(err) || Math.min(30_000 * 2 ** attempt, 120_000);
+
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  // unreachable, but satisfies TypeScript
+  throw new Error("analyzeAdAndPage: exceeded max retries");
 }
