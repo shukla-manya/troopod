@@ -1,6 +1,6 @@
 # Troopod
 
-Next.js app that scrapes a landing page, sends the page snapshot plus an ad creative to Gemini, and returns AI-suggested copy changes with a before/after HTML preview.
+Next.js app that scrapes a landing page, sends the page snapshot plus an ad creative to Groq, and returns AI-suggested copy changes with a before/after HTML preview.
 
 ## Folder structure
 
@@ -41,4 +41,3 @@ npm install
 npm run dev
 ```
 
-Set `GEMINI_API_KEY` in `.env.local` (see `src/lib/env.ts`).
