@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { PersonalizeRequestSchema } from "../../../lib/validators";
 import { runPersonalization, ScrapingError, AIValidationError } from "../../../services/personalization-service";
 export const maxDuration = 60;
-
 export async function POST(request: Request) {
   let body: unknown;
   try {
