@@ -1,5 +1,4 @@
 "use client";
-
 import type { PersonalizationResult } from "../lib/validators";
 
 type Props = {
