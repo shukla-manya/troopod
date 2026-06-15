@@ -9,7 +9,6 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
-
   const parsed = PersonalizeRequestSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
