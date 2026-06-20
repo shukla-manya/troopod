@@ -8,7 +8,6 @@ const CONFIDENCE_COLORS = {
   medium: "bg-yellow-100 text-yellow-700",
   low: "bg-gray-100 text-gray-600",
 };
-
 export default function DiffSummary({ result }: Props) {
   const { adAnalysis, summary, modifications, cro_principles_applied, metadata } = result;
 
