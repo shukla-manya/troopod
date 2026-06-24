@@ -1,7 +1,6 @@
 import Groq from "groq-sdk";
 import { getGroqKey } from "./env";
 import type { AdInput, ScopedElement } from "./validators";
-
 let _client: Groq | null = null;
 
 const SYSTEM_PROMPT = `You are a Conversion Rate Optimization (CRO) specialist and copywriter.
