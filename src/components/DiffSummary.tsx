@@ -10,7 +10,6 @@ const CONFIDENCE_COLORS = {
 };
 export default function DiffSummary({ result }: Props) {
   const { adAnalysis, summary, modifications, cro_principles_applied, metadata } = result;
-
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
