@@ -22,7 +22,6 @@ export default function DiffSummary({ result }: Props) {
           <p className="text-xs text-gray-400">changes applied</p>
         </div>
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-indigo-50 rounded-xl p-4 space-y-2">
           <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Ad Analysis</p>
